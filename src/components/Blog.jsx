@@ -1,15 +1,8 @@
-import  { jwtDecode }  from 'jwt-decode'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import blogService from '../services/blogService'
+import './Blog.css'
 
-const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
-  const blogStyle = {
-    paddingTop: 5,
-    paddingLeft: 5,
-    border: 'solid',
-    borderWidth: 2,
-    marginBottom: 5
-  }
+const Blog = ({ blog, updateBlog, deleteBlog, user, setBlogs, blogs }) => {
   const [visible, setVisible] = useState(false)
 
   const toggleVisibility = () => {
@@ -21,44 +14,73 @@ const Blog = ({ blog, updateBlog, deleteBlog, user }) => {
       ...blog,
       likes: blog.likes + 1,
       user: blog.user,
-      id: user.id
     }
     const returnedBlog = await blogService.update(blog.id, updatedBlog)
-    console.log('returned blog:', returnedBlog)
-    updateBlog(returnedBlog)
-  }
 
-  const handleDelete = async () => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      await blogService.remove(blog.id)
-      deleteBlog(blog.id)
+    const fixedBlog = {
+      ...returnedBlog,
+      user: blog.user
     }
-  }
-  let userId
-  if (user && user.token) {
-    const decodedToken = jwtDecode(user.token)
-    userId = decodedToken.id
+
+    setBlogs(prevBlogs => prevBlogs.map(b => b.id === fixedBlog.id ? fixedBlog : b))
+    updateBlog(fixedBlog)
   }
 
-  const canDelete = userId && blog.user && blog.user.id && userId === blog.user.id
-  console.log('user token:', user.token)
-  console.log('blog user id:', blog.user.id)
-  console.log('userId:', userId)
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Do you want to delete this blog?')
+    if (!confirmDelete) {
+      return
+    }
+
+    const storedUser = JSON.parse(window.localStorage.getItem('loggedBlogappUser'))
+    const token = storedUser ? storedUser.token : null
+    
+    console.log('TOKEN:', token)
+    if (!token) {
+        console.error('No token found')
+        return
+    }
+    try {
+      console.log('blog id:', blog.id)
+      const response = await fetch(`/api/blogs/${blog.id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+      })
+      if (response.ok) {
+        const updatedBlogs = await fetchBlogs()
+        setBlogs(updatedBlogs)
+      } else {
+        const errorData = await response.json()
+        console.error(errorData.error)
+      }
+  } catch (error) {
+    console.error('Error deleting blog:', error)
+  }
+}
+
+const fetchBlogs = async () => {
+    const response = await fetch('/api/blogs')
+    const blogs = await response.json()
+    return blogs
+}
+
 
   return (
-    <div style={blogStyle}>
-      <div>
+    <div className='blog'>
+      <div className='blog-title-author'>
         {blog.title} {blog.author}
         <button type="button" onClick={toggleVisibility}>
           {visible ? 'hide' : 'view'}
         </button>
       </div>
       {visible && (
-        <div>
+        <div className='blog-details'>
           <p>{blog.url}</p>
           <p>{blog.likes} likes <button onClick={handleLike}>like</button></p>
           <p>{blog.user.name}</p>
-          {canDelete && (
+          {user && user.id === blog.user.id && (
             <button onClick={handleDelete}>remove</button>
           )}
         </div>

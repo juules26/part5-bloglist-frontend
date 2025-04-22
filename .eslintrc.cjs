@@ -4,6 +4,11 @@ module.exports = {
     browser: true,
     es2020: true,
   },
+  globals: {
+    "test": "readonly",
+    "expect": "readonly",
+    "describe": "readonly"
+  },
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',

@@ -13,9 +13,9 @@ const App = () => {
   const [notification, setNotification] = useState({ message: null, type: '' })
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
+    blogService.getAll().then(blogs => {
       setBlogs(blogs)
-    )
+    })
   }, [])
 
   useEffect(() => {
@@ -30,15 +30,25 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({
+      const loginResponse = await loginService.login({
         username, password
       })
 
+      const userDetails = await loginService.getUserDetails(loginResponse.token)
+      const loggedUser = userDetails.find(user => username === loginResponse.username)
+
+      if (!loggedUser) {
+        throw new Error('User not found in details')
+      }
+
       window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
+        'loggedBlogappUser', JSON.stringify({
+          ...loginResponse,
+          id: loggedUser.id
+        })
       )
-      blogService.setToken(user.token)
-      setUser(user)
+      blogService.setToken(loginResponse.token)
+      setUser({...loginResponse, id: loggedUser.id})
       setUsername('')
       setPassword('')
       setNotification({ message: 'Login successful', type: 'success' })
@@ -88,7 +98,7 @@ const App = () => {
     setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
   }
 
-  const deleteBlog = (id) => {
+  const deleteBlog = async (id) => {
     setBlogs(blogs.filter(blog => blog.id !== id))
   }
 
@@ -99,19 +109,23 @@ const App = () => {
         <h2>Log in to application</h2>
         <form onSubmit={handleLogin}>
           <div>
-            Username
+            <label htmlFor='username'>Username</label>
             <input
               type='text'
+              id='username'
               value={username}
               onChange={({ target }) => setUsername(target.value)}
+              data-testid='username'
             />
           </div>
           <div>
-            Password
+            <label htmlFor='password'>Password</label>
             <input
               type='password'
+              id='password'
               value={password}
               onChange={({ target }) => setPassword(target.value)}
+              data-testid='password'
             />
           </div>
           <button type='submit'>Login</button>
@@ -129,7 +143,7 @@ const App = () => {
       </p>
       <BlogForm createBlog={createBlog} user={user} />
       {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} user={user} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} user={user} setBlogs={setBlogs} />
       )}
     </div>
   )

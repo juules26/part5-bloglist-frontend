@@ -1,23 +1,13 @@
 import React from 'react'
+import './Notification.css'
 
-// este comp acepta 2 prompt
 const Notification = ({ message, type }) => {
   if (!message) return null
 
+  const notificationClass = type === 'error' ? 'notification notification-error' : 'notification notification-success'
+
   return (
-    <div
-      style={{
-        backgroundColor: 'gainsboro',
-        border: `3px solid ${type === 'error' ? 'red' : 'green'}`,
-        color: type === 'error' ? 'red' : 'green',
-        padding : '10px',
-        top: 0,
-        left: 0,
-        right: 0,
-        textAlign: 'centre',
-        borderRadius: '10px',
-      }}
-    >
+    <div className={notificationClass}>
       {message}
     </div>
   )
