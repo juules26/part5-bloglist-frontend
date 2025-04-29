@@ -1,8 +1,39 @@
-# React + Vite
+# Bloglist Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend de una aplicación de blogs donde puedes iniciar sesión, ver una lista de blogs, crear nuevos, dar likes y borrar blogs (si eres el autor).
 
-Currently, two official plugins are available:
+Esta parte del proyecto está hecha con React y se comunica con una API backend hecha con Node.js y MongoDB.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Características
+
+- Inicio de sesión
+- Mostrar blogs ordenados por likes
+- Crear nuevos blogs
+- Dar "like" a blogs existentes
+- Borrar blogs propios
+- Notificaciones de éxito/error
+- Manejo de errores y login persistente
+
+## Tecnologías usadas (Frontend)
+
+- React
+- Axios
+- React Testing Library (tests)
+- Jest
+- Cypress (para testing end-to-end)
+
+## Tecnologías usadas (Backend)
+
+- Node.js
+- Express
+- MongoDB
+
+## Cómo iniciar la app
+
+Asegúrate de tener el backend corriendo en `http://localhost:3001`.
+
+```bash
+git clone https://github.com/[tu usuario]/bloglist-frontend.git
+cd bloglist-frontend
+npm install
+npm start
